@@ -1,13 +1,25 @@
 import io
-
+import re
 
 from PIL import Image
+import torch
 from torchvision import models
 import torchvision.transforms as transforms
 
 
-def get_model():
-    model = models.densenet121(pretrained=True)
+def get_model(model_path=None):
+    model = models.DenseNet(32, (6, 12, 24, 16), 64)
+    pattern = re.compile(
+        r'^(.*denselayer\d+\.(?:norm|relu|conv))\.((?:[12])\.(?:weight|bias|running_mean|running_var))$')
+
+    state_dict = torch.load(model_path, map_location=None)
+    for key in list(state_dict.keys()):
+        res = pattern.match(key)
+        if res:
+            new_key = res.group(1) + res.group(2)
+            state_dict[new_key] = state_dict[key]
+            del state_dict[key]
+    model.load_state_dict(state_dict)
     model.eval()
     return model
 

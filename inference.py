@@ -2,7 +2,7 @@ import json
 
 from commons import get_model, transform_image
 
-model = get_model()
+model = get_model('model/densenet121-a639ec97.pth')
 imagenet_class_index = json.load(open('imagenet_class_index.json'))
 
 
